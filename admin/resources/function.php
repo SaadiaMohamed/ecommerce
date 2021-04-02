@@ -9,9 +9,7 @@
 ?>
 
 
-
 <?php
-
 function countItem(){
 global $con;
 $stmt2 = $con->prepare("SELECT COUNT(*) FROM users WHERE groupid=0

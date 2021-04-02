@@ -46,7 +46,7 @@ if(isset($_GET['do'])){
                     <a class="btn btn-info m-1" href="?do=show&productid=<?= $product['product_id']?>" title="Show">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a class="btn btn-warning m-1" href="?do=edit" title="Edit">
+                    <a class="btn btn-warning m-1" href="?do=edit&productid=<?= $product['product_id']?>" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
                     <a class="btn btn-danger m-1" href="?do=delete&productid=<?= $product['product_id']?>" title="Delete">
