@@ -27,7 +27,7 @@ if(isset($_GET['do'])){
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">Product Category</th>
+                <th scope="col">photo</th>
                 <th scope="col">Product Name</th>
                 <th scope="col">Product Price</th>
                 <th scope="col">created at</th>
@@ -38,8 +38,10 @@ if(isset($_GET['do'])){
             <?php foreach($products as $product):?>
             <tr>
                 <!-- php echo => = -->
-                <th scope="row"><?=$product['product_category']?></th>
-                <td><?=$product['product_name']?></td>
+                <th scope="row">
+                    <img style="height:15vh" src="public\imgs\uploads\products\<?= $product['path']?>" alt="<?= $product['path']?>">
+                </th>
+                <th scope="row"><?=$product['product_name'] ?></th>
                 <td><?=$product['product_price']?></td>
                 <td><?=$product['created_at']?></td>
                 <td>
@@ -65,7 +67,7 @@ if(isset($_GET['do'])){
 <!-- start add products page-->
 <div class="container">
     <h1 class="text-center">Add Product</h1>
-    <form method="post" action="?do=insert">
+    <form method="post" action="?do=insert" enctype="multipart/form-data">
         <div class="mb-3">
             <label class="form-label">Product Category</label>
             <input type="text" class="form-control" name="productCategory">
@@ -78,6 +80,10 @@ if(isset($_GET['do'])){
             <label class="form-label">Product price</label>
             <input type="text" class="form-control" name="productPrice">
         </div>
+        <div class="mb-3">
+  <label for="formFile" class="form-label">upload photo</label>
+  <input class="form-control" type="file" id="formFile" name="avatar">
+</div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 </div>
@@ -85,15 +91,57 @@ if(isset($_GET['do'])){
 <?php elseif($do == 'insert'):?>
 <!-- start insert products page-->
 <?php 
-            if($_SERVER['REQUEST_METHOD']=="POST")
-            {
+            if($_SERVER['REQUEST_METHOD']=="POST"){
+                // get the photo informations in an array
+                // $avatar = $_FILES['avatar'];
+                // will call every single data in a variable
+                $avatarName = $_FILES['avatar']['name'];
+                $avatarType = $_FILES['avatar']['type'];
+                $avatarTmpName = $_FILES['avatar']['tmp_name'];
+                $avatarError = $_FILES['avatar']['error'];
+                $avatarSize = $_FILES['avatar']['size'];
+
+
+                // echo "<pre>";
+                // print_r($avatar);
+                // echo "</pre>";
+
+                // to allow downloading only the img
+                $avatarAllowedExtension = array("image/jpeg" , "image/png", "img/jpg");
+                if(in_array($avatarType , $avatarAllowedExtension)){
+                    $avatar = rand(0 , 1000)."_".$avatarName;
+                    // move_uploaded_file("$destination");
+                     $destination = "public\imgs\uploads\products\\".$avatar;
+                     move_uploaded_file($avatarTmpName ,$destination);
+                }
                 $productCategory = $_POST['productCategory'];
                 $productName = $_POST['productName'];
                 $productPrice = $_POST['productPrice'];
-                $stmt = $con -> prepare("INSERT INTO products(product_category,product_name,product_price,created_at) VALUES (?,?,?,now())");
-                $stmt -> execute(array($productCategory,$productName,$productPrice));
+
+                // start backend validation
+        $formErrors = array();
+        if(empty($productName)){
+            $formErrors[]="productname must be not empty";
+        }
+        if(strlen($productName)< 4){
+            $formErrors[]="productname must be not less than 4";
+        }
+        foreach($formErrors as $error){
+            echo $error . "<br>";
+        }
+        // end backend validation
+        if(empty($formErrors)){
+                $stmt = $con -> prepare("INSERT INTO products(product_category,product_name,product_price,created_at,path) VALUES (?,?,?,now(),?)");
+                $stmt -> execute(array($productCategory,$productName,$productPrice,$avatar));
                 header("location:products.php?do=add");
+            }else{
+                foreach($formErrors as $error){
+                    echo $error ."<br>";
+                    exit();
+                 }
             }
+            
+        }
         ?>
 
 
