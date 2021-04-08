@@ -35,9 +35,9 @@ if(isset($_GET['do'])){
         <thead>
             <tr>
                 <th scope="col">photo</th>
-                <th scope="col">Username</th>
+                <th scope="col">User Name</th>
                 <th scope="col">Email</th>
-                <th scope="col">fullname</th>
+                <th scope="col">full Name</th>
                 <th scope="col">created at</th>
                 <th scope="col">control</th>
             </tr>
@@ -108,7 +108,7 @@ if(isset($_GET['do'])){
         // print_r($avatar);
         // echoz "</pre>";
         // to check photo type
-        $avatarAllowedExtension = array("image/jpeg" , "image/png", "img/jpg");
+        $avatarAllowedExtension = array("image/jpeg" , "image/png", "img/gif");
         if(in_array($avatarType , $avatarAllowedExtension)){
         //     echo "done";
         // }else{
@@ -128,12 +128,18 @@ if(isset($_GET['do'])){
         if(empty($username)){
             $formErrors[]="username must not be empty";
         }
-        if(strlen($username)< 4){
-            $formErrors[]="username must not be less than 4";
+        if(strlen($fullname)< 10){
+            $formErrors[]="full name must must be greater than 10 characters";
         }
-        foreach($formErrors as $error){
-            echo $error . "<br>";
+        if(empty($_POST['password'])){
+            $formErrors[]="you must enter you password";
         }
+        if(empty($email)){
+            $formErrors[]="you must enter you email";
+        }
+        // foreach($formErrors as $error){
+        //     echo $error . "<br>";
+        // }
         // end backend validation
         if(empty($formErrors)){
             $stmt=$con->prepare("INSERT INTO users(username,password,email,fullname,groupid,created_at,path)VALUES(?,?,?,?,0,now(),?)");

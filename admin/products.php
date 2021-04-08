@@ -16,7 +16,7 @@ if(isset($_GET['do'])){
 <?php if($do == "manage"):?>
 <!-- start all products page-->
 <?php
-    $stmt = $con->prepare("SELECT * FROM products WHERE categoryid=1");
+    $stmt = $con->prepare("SELECT * FROM products WHERE categoryid=0");
     $stmt -> execute();
     $products = $stmt->fetchAll();
 ?>
@@ -107,7 +107,7 @@ if(isset($_GET['do'])){
                 // echo "</pre>";
 
                 // to allow downloading only the img
-                $avatarAllowedExtension = array("image/jpeg" , "image/png", "img/jpg");
+                $avatarAllowedExtension = array("image/jpeg" , "image/png", "img/gif");
                 if(in_array($avatarType , $avatarAllowedExtension)){
                     $avatar = rand(0 , 1000)."_".$avatarName;
                     // move_uploaded_file("$destination");
@@ -123,12 +123,15 @@ if(isset($_GET['do'])){
         if(empty($productName)){
             $formErrors[]="productname must be not empty";
         }
-        if(strlen($productName)< 4){
-            $formErrors[]="productname must be not less than 4";
+        if(strlen($productName) > 20){
+            $formErrors[]="productname must be not greater than 20";
         }
-        foreach($formErrors as $error){
-            echo $error . "<br>";
+        if(empty($productCategory)){
+            $formErrors[]="you must enter your product category";
         }
+        // foreach($formErrors as $error){
+        //     echo $error . "<br>";
+        // }
         // end backend validation
         if(empty($formErrors)){
                 $stmt = $con -> prepare("INSERT INTO products(product_category,product_name,product_price,created_at,path) VALUES (?,?,?,now(),?)");
@@ -140,7 +143,8 @@ if(isset($_GET['do'])){
                     exit();
                  }
             }
-            
+        }else{
+            header("location:products.php");
         }
         ?>
 
