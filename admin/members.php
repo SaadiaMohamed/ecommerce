@@ -19,8 +19,17 @@ if(isset($_GET['do'])){
 <?php
 
 // to select all from database ----featchAll()
+// start pagination
+$recorded_per_page = 2;
+// $page just make if condition to check your paginate page
+$page = isset($_GET['page']) ? $_GET['page']:1;
+// echo $page;
+$start_From=($page-1)*$recorded_per_page;
+// echo $start_From;
+// exit();
+// end pagination
 
-    $stmt = $con->prepare("SELECT * FROM users WHERE groupid=0");
+    $stmt = $con->prepare("SELECT * FROM users WHERE groupid=0 LIMIT $start_From , $recorded_per_page");
     $stmt->execute();
     $rows = $stmt->fetchAll();
     // echo "<pre>";
@@ -54,16 +63,38 @@ if(isset($_GET['do'])){
                 <td><?=$row["fullname"]?></td>
                 <td><?=$row["created_at"]?></td>
                 <td>
-                    <a class="btn btn-info m-1" href="?do=show&userid=<?=$row['user_id']?>" title="show"><i
-                            class="fas fa-eye"></i></a>
+                    <a class="btn btn-info m-1" href="?do=show&userid=<?=$row['user_id']?>" title="show"><i class="fas fa-eye"></i></a>
+                    
+                    <?php if($_SESSION['GOUP_ID']== 1):?>
                     <a class="btn btn-warning" href="?do=edit&userid=<?=$row['user_id']?>" title="edit"><i class="fas fa-edit"></i></a>
                     <a class="btn btn-danger" href="?do=delete&userid=<?=$row['user_id']?>" title="Delete"><i class="fas fa-trash-alt"></i></a>
+                    <?php endif?>
                 </td>
             </tr>
-                <?php endforeach?>
+            <?php endforeach?>
         </tbody>
     </table>
-
+    <!-- start paginate counter -->
+    <?php
+    $stmt=$con->prepare("SELECT * FROM users WHERE groupid=0 ORDER BY user_id DESC");
+    $stmt->execute();
+    $total_recorded=$stmt->rowCount();
+    /*ceil->function to approximate float to integer
+      ceil-> cieling
+    */
+    $total_page = ceil($total_recorded / $recorded_per_page);
+    // start loop to add pagination button automaticly with increasing users number 
+    $start_loop =1;
+    $end_loop = $total_page;
+    ?>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+        <?php for($i= $start_loop ; $i <= $end_loop ; $i++):?>
+            <li class="page-item"><a class="page-link" href="?do=manage&page=<?=$i?>"><?=$i?></a></li>
+        <?php endfor?>
+        </ul>
+    </nav>
+<!-- end paginate counter -->
 </div>
 
 <?php elseif($do == "add"):?>

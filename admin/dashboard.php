@@ -11,9 +11,11 @@
     <div class="col-lg-4">
     <div class="members">
         <i class="fas fa-users"></i>
-        <?= countItem()?>
+        <?= countItem("user_id", "users","groupid=0" )?>
         <br>
         <i class="fas fa-shopping-cart"></i>
+        <?= countItem("product_id" , "products" , "categoryid=0")?>
+
     </div>
     </div>
 

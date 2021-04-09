@@ -7,7 +7,7 @@
       $adminPassword = $_POST['adminpassword'];
       $hashedPass = sha1($adminPassword);
 
-      $stmt = $con->prepare("SELECT * FROM users WHERE username=? AND password=? AND groupid = 1");
+      $stmt = $con->prepare("SELECT * FROM users WHERE username=? AND password=? AND groupid !=0");
       $stmt->execute(array($adminUsername , $hashedPass));
       $row = $stmt->fetch();
       // fetchAll()
