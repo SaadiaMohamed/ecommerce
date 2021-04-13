@@ -16,9 +16,20 @@ if(isset($_GET['do'])){
 <?php if($do == "manage"):?>
 <!-- start all products page-->
 <?php
-    $stmt = $con->prepare("SELECT * FROM products WHERE categoryid=0");
+/* to display the category name instead of cat_id using the join between products and 
+    categories tables*/
+    $stmt = $con->prepare("SELECT products.* , categories.cat_name FROM products
+                            INNER JOIN categories ON categories.cat_id=products.cat_id
+                        ");
     $stmt -> execute();
     $products = $stmt->fetchAll();
+
+    // echo "<pre>";
+    // print_r($products);
+    // echo "</pre>";
+    // exit();
+
+
 ?>
 
 <div class="container">
@@ -30,7 +41,8 @@ if(isset($_GET['do'])){
                 <th scope="col">photo</th>
                 <th scope="col">Product Name</th>
                 <th scope="col">Product Price</th>
-                <th scope="col">created at</th>
+                <th scope="col">Description</th>
+                <th scope="col">category</th>
                 <th scope="col">control</th>
             </tr>
         </thead>
@@ -43,7 +55,9 @@ if(isset($_GET['do'])){
                 </th>
                 <th scope="row"><?=$product['product_name'] ?></th>
                 <td><?=$product['product_price']?></td>
-                <td><?=$product['created_at']?></td>
+                <td><?=$product['product_desc']?></td>
+                <td><?=$product['cat_name']?></td>
+
                 <td>
                     <a class="btn btn-info m-1" href="?do=show&productid=<?= $product['product_id']?>" title="Show">
                         <i class="fas fa-eye"></i>
@@ -68,17 +82,30 @@ if(isset($_GET['do'])){
 <div class="container">
     <h1 class="text-center">Add Product</h1>
     <form method="post" action="?do=insert" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label">Product Category</label>
-            <input type="text" class="form-control" name="productCategory">
-        </div>
-        <div class="mb-3">
+         <div class="mb-3">
             <label class="form-label">Product Name</label>
             <input type="text" class="form-control" name="productName">
         </div>
         <div class="mb-3">
             <label class="form-label">Product price</label>
             <input type="text" class="form-control" name="productPrice">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-control" name="desc">
+        </div>
+        <?php
+            $stmt=$con->prepare("SELECT * FROM categories");
+            $stmt->execute();
+            $categories = $stmt->fetchAll();
+        ?>
+        <div class="mb-3">
+        <select class="form-select" name="category">
+            <option selected>Select Category</option>
+            <?php foreach($categories as $category):?>
+            <option value="<?=$category['cat_id']?>"><?= $category['cat_name'] ?></option>
+            <?php endforeach?>
+        </select>
         </div>
         <div class="mb-3">
   <label for="formFile" class="form-label">upload photo</label>
@@ -114,9 +141,12 @@ if(isset($_GET['do'])){
                      $destination = "public\imgs\uploads\products\\".$avatar;
                      move_uploaded_file($avatarTmpName ,$destination);
                 }
-                $productCategory = $_POST['productCategory'];
+
                 $productName = $_POST['productName'];
                 $productPrice = $_POST['productPrice'];
+                $productDesc = $_POST['desc'];
+                $category=$_POST['category'];
+
 
                 // start backend validation
         $formErrors = array();
@@ -126,16 +156,13 @@ if(isset($_GET['do'])){
         if(strlen($productName) > 20){
             $formErrors[]="productname must be not greater than 20";
         }
-        if(empty($productCategory)){
-            $formErrors[]="you must enter your product category";
-        }
-        // foreach($formErrors as $error){
+              // foreach($formErrors as $error){
         //     echo $error . "<br>";
         // }
         // end backend validation
         if(empty($formErrors)){
-                $stmt = $con -> prepare("INSERT INTO products(product_category,product_name,product_price,created_at,path) VALUES (?,?,?,now(),?)");
-                $stmt -> execute(array($productCategory,$productName,$productPrice,$avatar));
+                $stmt = $con -> prepare("INSERT INTO products(product_name,product_price,path,product_desc,cat_id) VALUES (?,?,?,?,?)");
+                $stmt -> execute(array($productName, $productPrice,$avatar, $productDesc,$category));
                 header("location:products.php?do=add");
             }else{
                 foreach($formErrors as $error){
